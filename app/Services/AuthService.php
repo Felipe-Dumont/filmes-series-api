@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\User;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
@@ -27,22 +28,24 @@ class AuthService
     }
 
     // Método para fazer login de um usuário
-    public function login(array $data): array
+    public function login(Request $request)
     {
-        $validator = Validator::make($data, [
-            'email' => 'required|string|email|max:255',
-            'password' => 'required|string|min:8',
+        $credentials = $request->validate([
+            'email' => 'required|email',
+            'password' => 'required'
         ]);
 
-        if ($validator->fails()) {
-            return ['errors' => $validator->errors()];
+        if (!Auth::attempt($credentials)) {
+            return response()->json(['message' => 'Credenciais inválidas'], 401);
         }
 
-        if (Auth::attempt(['email' => $data['email'], 'password' => $data['password']])) {
-            return ['user' => Auth::user()];
-        }
+        $user = Auth::user();
+        $token = $user->createToken('auth_token')->plainTextToken;
 
-        return ['errors' => 'Invalid credentials'];
+        return response()->json([
+            'user' => $user,
+            'token' => $token
+        ]);
     }
 
     // Método para fazer logout

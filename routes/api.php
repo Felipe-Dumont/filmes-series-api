@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\FilmeController;
 use App\Http\Controllers\CategoriaController;
+use App\Http\Middleware\AuthTokenMiddleware;
 
 // Rotas de Autenticação
 Route::prefix('auth')->group(function () {
@@ -13,7 +14,7 @@ Route::prefix('auth')->group(function () {
 });
 
 // Protegendo as rotas de Filmes e Categorias com autenticação
-Route::middleware('auth:api')->group(function () {
+Route::middleware(['auth:sanctum'])->group(function () {
 
     // Rotas para Filmes
     Route::prefix('filmes')->group(function () {
